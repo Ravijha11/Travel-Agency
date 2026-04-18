@@ -4,6 +4,7 @@ import { createAdminClient } from "@/utils/supabase/admin";
 
 const isDashboard = createRouteMatcher(["/dashboard(.*)"]);
 const isAdminRoute = createRouteMatcher(["/admin(.*)"]);
+const isDriverOnlyArea = createRouteMatcher(["/account(.*)", "/my-trips(.*)"]);
 
 const skipRestrictedRedirect = createRouteMatcher([
   "/sign-in(.*)",
@@ -27,6 +28,31 @@ export default clerkMiddleware(async (auth, req) => {
       .maybeSingle();
 
     if (data?.role !== "admin") {
+      return NextResponse.redirect(new URL("/", req.url));
+    }
+    return NextResponse.next();
+  }
+
+  if (isDriverOnlyArea(req)) {
+    await auth.protect();
+    const { userId } = await auth();
+    if (!userId) return NextResponse.next();
+
+    const supabase = createAdminClient();
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("role, is_restricted")
+      .eq("id", userId)
+      .maybeSingle();
+
+    if (profile?.is_restricted) {
+      return NextResponse.redirect(new URL("/suspended", req.url));
+    }
+    if (
+      profile &&
+      profile.role !== "driver" &&
+      profile.role !== "admin"
+    ) {
       return NextResponse.redirect(new URL("/", req.url));
     }
     return NextResponse.next();

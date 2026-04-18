@@ -1,6 +1,7 @@
 "use client";
 
-import { useTransition } from "react";
+import { useRouter } from "next/navigation";
+import { useState, useTransition } from "react";
 import { markTripCompleted, markTripFull } from "@/app/actions/trips";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -12,6 +13,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { ROUTE_LABELS, type RouteDirection } from "@/lib/constants";
+import { formatIst12h } from "@/lib/format-ist-time";
 
 type Trip = {
   id: string;
@@ -25,7 +27,24 @@ type Trip = {
 };
 
 export function DriverTripRow({ trip }: { trip: Trip }) {
+  const router = useRouter();
   const [pending, startTransition] = useTransition();
+  const [actionError, setActionError] = useState<string | null>(null);
+
+  function runAction(fn: () => Promise<{ ok: boolean; error?: string }>) {
+    setActionError(null);
+    startTransition(async () => {
+      const res = await fn();
+      if (!res.ok) {
+        setActionError(
+          res.error ??
+            "Something went wrong. Check your connection and try again.",
+        );
+        return;
+      }
+      router.refresh();
+    });
+  }
 
   return (
     <Card>
@@ -38,17 +57,18 @@ export function DriverTripRow({ trip }: { trip: Trip }) {
         </Badge>
       </CardHeader>
       <CardContent className="space-y-1 text-sm text-muted-foreground">
-        <p>
-          {new Date(trip.departure_time).toLocaleString("en-IN", {
-            timeZone: "Asia/Kolkata",
-          })}
-        </p>
+        <p className="text-foreground">{formatIst12h(trip.departure_time)}</p>
         <p>
           {trip.origin} → {trip.destination}
         </p>
         <p>
           {trip.available_seats} seats · ₹{trip.price_per_seat}/seat
         </p>
+        {actionError ? (
+          <p className="text-sm text-destructive" role="alert">
+            {actionError}
+          </p>
+        ) : null}
       </CardContent>
       <CardFooter className="flex flex-wrap gap-2">
         {trip.status === "active" ? (
@@ -57,11 +77,7 @@ export function DriverTripRow({ trip }: { trip: Trip }) {
             variant="secondary"
             disabled={pending}
             className="min-h-11"
-            onClick={() =>
-              startTransition(async () => {
-                await markTripFull(trip.id);
-              })
-            }
+            onClick={() => runAction(() => markTripFull(trip.id))}
           >
             Mark as full
           </Button>
@@ -71,11 +87,7 @@ export function DriverTripRow({ trip }: { trip: Trip }) {
           variant="outline"
           size="sm"
           disabled={pending}
-          onClick={() =>
-            startTransition(async () => {
-              await markTripCompleted(trip.id);
-            })
-          }
+          onClick={() => runAction(() => markTripCompleted(trip.id))}
         >
           Mark completed
         </Button>

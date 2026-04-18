@@ -11,6 +11,25 @@ const withPWA = withPWAInit({
 });
 
 /** @type {import('next').NextConfig} */
-const nextConfig = {};
+let supabaseHost = null;
+try {
+  supabaseHost = new URL(process.env.NEXT_PUBLIC_SUPABASE_URL).hostname;
+} catch {
+  supabaseHost = null;
+}
+
+const nextConfig = {
+  images: {
+    remotePatterns: supabaseHost
+      ? [
+          {
+            protocol: "https",
+            hostname: supabaseHost,
+            pathname: "/**",
+          },
+        ]
+      : [],
+  },
+};
 
 export default withPWA(nextConfig);

@@ -13,12 +13,19 @@ import { incrementTripCallCount } from "@/app/actions/trips";
 import { toTelHref } from "@/lib/phone";
 import { Phone } from "lucide-react";
 import { VerifiedBadge } from "@/components/verified-badge";
+import { getCarModelInfo } from "@/lib/car-models";
+import { CarCatalogImageCover } from "@/components/car-catalog-image";
+import { DepartureCountdown } from "@/components/departure-countdown";
 
 export type TripCardProps = {
   tripId: string;
+  /** ISO instant for live countdown until departure */
+  departureIso: string;
   departureLabel: string;
   carModel: string;
   carNumber: string;
+  carImageSrc?: string;
+  carLabel?: string;
   driverName: string;
   phone: string;
   origin: string;
@@ -31,9 +38,12 @@ export type TripCardProps = {
 
 export function TripCard({
   tripId,
+  departureIso,
   departureLabel,
   carModel,
   carNumber,
+  carImageSrc,
+  carLabel,
   driverName,
   phone,
   origin,
@@ -45,6 +55,11 @@ export function TripCard({
 }: TripCardProps) {
   const [pending, startTransition] = useTransition();
   const tel = toTelHref(phone);
+  const fallback = getCarModelInfo(carModel);
+  const car = {
+    label: carLabel ?? fallback.label,
+    imageSrc: carImageSrc ?? fallback.imageSrc,
+  };
 
   function handleCall() {
     startTransition(async () => {
@@ -71,6 +86,10 @@ export function TripCard({
             <p className="text-2xl font-semibold tabular-nums tracking-tight">
               {departureLabel}
             </p>
+            <DepartureCountdown
+              departureIso={departureIso}
+              className="text-sm font-medium text-amber-700 dark:text-amber-400"
+            />
             <p className="text-sm text-muted-foreground">
               {origin} → {destination}
             </p>
@@ -81,9 +100,17 @@ export function TripCard({
         </div>
       </CardHeader>
       <CardContent className="space-y-2 pb-3">
+        <div className="relative aspect-[4/3] w-full overflow-hidden rounded-lg border bg-muted/30">
+          <CarCatalogImageCover
+            src={car.imageSrc}
+            alt={car.label}
+            priority={sponsored}
+          />
+          <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/15 via-transparent to-transparent" />
+        </div>
         <div className="space-y-0.5 text-base font-medium">
           <div className="flex flex-wrap items-baseline gap-x-2 gap-y-0.5">
-            <span>{carModel || "Car"}</span>
+            <span>{car.label || "Car"}</span>
             {carNumber ? (
               <span className="text-sm font-semibold tracking-wide text-muted-foreground">
                 {carNumber}
@@ -100,7 +127,7 @@ export function TripCard({
       <CardFooter className="pt-0">
         <Button
           type="button"
-          className="h-14 w-full bg-green-600 text-lg font-semibold text-white hover:bg-green-700"
+          className="h-14 w-full text-lg font-semibold"
           disabled={pending || tel === "#"}
           onClick={handleCall}
         >

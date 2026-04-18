@@ -14,6 +14,26 @@ export function istCalendarDateString(d = new Date()): string {
   }).format(d);
 }
 
+/** Latest calendar day (IST) drivers may book: today + 1 → tomorrow. */
+export function istMaxBookingDateYmd(from = new Date()): string {
+  return istAddCalendarDays(istCalendarDateString(from), 1);
+}
+
+/** ISO instant: start of the day after tomorrow in IST (exclusive upper bound for “today or tomorrow” trips). */
+export function istDayAfterTomorrowMidnightIso(from = new Date()): string {
+  const today = istCalendarDateString(from);
+  const dayAfter = istAddCalendarDays(today, 2);
+  return istLocalDateTimeToIso(dayAfter, 0, 0);
+}
+
+export function istAddCalendarDays(dateYmd: string, deltaDays: number): string {
+  const [y, m, d] = dateYmd.split("-").map(Number);
+  if (!y || !m || !d) return dateYmd;
+  const noon = new Date(`${y}-${pad2(m)}-${pad2(d)}T12:00:00+05:30`);
+  noon.setTime(noon.getTime() + deltaDays * 86_400_000);
+  return istCalendarDateString(noon);
+}
+
 export function istWallClockParts(d: Date): {
   year: number;
   month: number;
@@ -98,7 +118,14 @@ export function isDepartureAllowedIso(iso: string): boolean {
   if (Number.isNaN(t)) return false;
   const { minute } = istWallClockParts(new Date(iso));
   if (!isQuarterMinute(minute)) return false;
-  return t >= Date.now() + MS_LEAD;
+  if (t < Date.now() + MS_LEAD) return false;
+
+  const depDay = istCalendarDateString(new Date(iso));
+  const today = istCalendarDateString();
+  const tomorrow = istAddCalendarDays(today, 1);
+  if (depDay !== today && depDay !== tomorrow) return false;
+
+  return true;
 }
 
 export { QUARTERS };

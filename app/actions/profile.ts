@@ -40,7 +40,16 @@ export async function updateMyDriverProfile(formData: FormData) {
     revalidatePath("/account");
     revalidatePath("/dashboard");
     revalidatePath("/my-trips");
+    return { ok: true as const };
   }
 
-  return { ok: !error, error: error?.message };
+  const raw = error.message ?? "";
+  const friendly =
+    raw.includes("violates") || raw.includes("check")
+      ? "Could not save — please check all fields and try again."
+      : raw.includes("JWT") || raw.includes("permission")
+        ? "Session expired. Sign in again and retry."
+        : raw || "Could not save your profile. Please try again.";
+
+  return { ok: false as const, error: friendly };
 }

@@ -13,6 +13,7 @@ import {
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { ROUTE_LABELS, type RouteDirection } from "@/lib/constants";
+import { formatIst12h } from "@/lib/format-ist-time";
 
 export default async function MyTripsPage() {
   const user = await currentUser();
@@ -86,9 +87,7 @@ export default async function MyTripsPage() {
                     </Badge>
                   </div>
                   <CardDescription>
-                    {new Date(t.departure_time).toLocaleString("en-IN", {
-                      timeZone: "Asia/Kolkata",
-                    })}
+                    {formatIst12h(t.departure_time)}
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="text-sm text-muted-foreground">

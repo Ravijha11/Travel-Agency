@@ -14,6 +14,7 @@ import { ensureClerkProfile } from "@/lib/clerk/ensure-profile";
 import { ClerkSignOutButton } from "@/components/clerk-sign-out-button";
 import { DriverProfileForm } from "@/components/driver-profile-form";
 import { VerifiedBadge } from "@/components/verified-badge";
+import { getActiveCarModels } from "@/lib/car-models-db";
 
 export default async function AccountPage() {
   const user = await currentUser();
@@ -49,6 +50,7 @@ export default async function AccountPage() {
   });
 
   const supabase = createAdminClient();
+  const carCatalog = await getActiveCarModels();
   const { data: profile } = await supabase
     .from("profiles")
     .select(
@@ -61,14 +63,34 @@ export default async function AccountPage() {
 
   return (
     <main className="mx-auto flex max-w-lg flex-col gap-4 px-4 pt-4">
-      <h1 className="text-xl font-semibold">Account</h1>
+      <h1 className="text-xl font-semibold">
+        {profile?.role === "driver" ? "Account & settings" : "Account"}
+      </h1>
       <Card>
         <CardHeader>
           <div className="flex flex-wrap items-center gap-2">
             <CardTitle className="text-lg">{profile?.full_name || "Driver"}</CardTitle>
             {profile?.is_verified ? <VerifiedBadge size="md" /> : null}
           </div>
-          <CardDescription>{email ?? profile?.phone_number ?? "—"}</CardDescription>
+          <CardDescription className="space-y-1.5">
+            {profile?.role === "driver" ? (
+              <>
+                <span className="block">
+                  Post trips and manage listings from{" "}
+                  <Link
+                    href="/dashboard"
+                    className="font-medium text-foreground underline underline-offset-2"
+                  >
+                    Trip updates
+                  </Link>
+                  . Use this page for email, sign out, and editing driver details.
+                </span>
+                <span className="block text-muted-foreground">{email ?? "—"}</span>
+              </>
+            ) : (
+              (email ?? profile?.phone_number ?? "—")
+            )}
+          </CardDescription>
         </CardHeader>
         <CardContent className="space-y-2 text-sm">
           <p>
@@ -106,6 +128,7 @@ export default async function AccountPage() {
             car_model: profile?.car_model ?? "",
             car_number: profile?.car_number ?? "",
           }}
+          carCatalog={carCatalog}
         />
       ) : null}
 
@@ -115,7 +138,7 @@ export default async function AccountPage() {
             href="/dashboard"
             className={cn(buttonVariants(), "inline-flex w-full justify-center")}
           >
-            Driver dashboard
+            Open Trip updates
           </Link>
         ) : null}
         {profile?.role === "admin" ? (

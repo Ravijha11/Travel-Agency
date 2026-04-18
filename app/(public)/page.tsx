@@ -7,6 +7,9 @@ import {
   DEFAULT_FEED_PRIORITY,
   isFeedSponsored,
 } from "@/lib/feed-priority";
+import { getActiveCarModels } from "@/lib/car-models-db";
+import { createCarResolver } from "@/lib/car-models";
+import { istDayAfterTomorrowMidnightIso } from "@/lib/departure-ist";
 import Image from "next/image";
 
 type Search = { [key: string]: string | string[] | undefined };
@@ -45,7 +48,10 @@ export default async function HomePage({
 }) {
   const direction = parseDirection(await searchParams);
   const supabase = await createClient();
+  const dbCars = await getActiveCarModels();
+  const resolveCar = createCarResolver(dbCars);
 
+  const feedUpper = istDayAfterTomorrowMidnightIso();
   const { data: trips, error } = await supabase
     .from("trips")
     .select(
@@ -54,6 +60,7 @@ export default async function HomePage({
     .eq("route_direction", direction)
     .eq("status", "active")
     .gt("departure_time", new Date().toISOString())
+    .lt("departure_time", feedUpper)
     .order("departure_time", { ascending: true });
 
   const driverIds = Array.from(
@@ -97,7 +104,9 @@ export default async function HomePage({
   return (
     <main className="mx-auto flex max-w-lg flex-col gap-4 px-4 pt-4">
       <header className="space-y-1">
-        <h1 className="text-xl font-semibold tracking-tight">Rides today</h1>
+        <h1 className="text-xl font-semibold tracking-tight">
+          {"Rides today & tomorrow"}
+        </h1>
 
         <div className="relative left-1/2 right-1/2 -ml-[50vw] -mr-[50vw] h-[38vh] min-h-[220px] w-screen max-h-[520px]">
           <Image
@@ -125,19 +134,23 @@ export default async function HomePage({
       <section className="flex flex-col gap-3">
         {!trips?.length ? (
           <p className="rounded-xl border bg-card p-6 text-center text-sm text-muted-foreground">
-            No active trips for this direction yet. Drivers can post from the
-            dashboard.
+            No trips for today or tomorrow on this route yet. Drivers can post
+            from the dashboard (India dates only).
           </p>
         ) : (
           sortedTrips.map((trip) => {
             const profile = profileById[trip.driver_id];
+            const car = resolveCar(profile?.car_model ?? "");
             return (
               <TripCard
                 key={trip.id}
                 tripId={trip.id}
+                departureIso={trip.departure_time}
                 departureLabel={formatTime(trip.departure_time)}
                 carModel={profile?.car_model ?? ""}
                 carNumber={profile?.car_number ?? ""}
+                carLabel={car.label}
+                carImageSrc={car.imageSrc}
                 driverName={profile?.full_name || "Driver"}
                 phone={profile?.phone_number ?? ""}
                 origin={trip.origin}

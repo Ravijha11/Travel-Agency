@@ -21,8 +21,9 @@ export default function HowItWorksPage() {
       <section className="space-y-2">
         <h2 className="text-base font-semibold">For drivers</h2>
         <ol className="list-decimal space-y-1 pl-5 text-sm text-muted-foreground">
-          <li>Sign in from the Account tab.</li>
-          <li>Open the Driver dashboard and post your trip.</li>
+          <li>Sign in (Driver login) from the bottom bar.</li>
+          <li>Open Trip updates and fill your driver details (name, phone, car).</li>
+          <li>After admin verification, post your trip.</li>
           <li>Update status when seats are full or trip is completed.</li>
         </ol>
       </section>
