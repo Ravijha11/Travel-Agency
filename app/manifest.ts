@@ -1,10 +1,11 @@
 import type { MetadataRoute } from "next";
+import { BRAND_NAME, BRAND_TAGLINE, LOGO_PATH } from "@/lib/branding";
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: "Lahar ↔ Gwalior Rides",
-    short_name: "L-G Rides",
-    description: "Find shared car rides between Lahar and Gwalior. Call drivers instantly.",
+    name: BRAND_NAME,
+    short_name: BRAND_NAME,
+    description: BRAND_TAGLINE,
     id: "/",
     scope: "/",
     start_url: "/",
@@ -18,13 +19,13 @@ export default function manifest(): MetadataRoute.Manifest {
     categories: ["travel", "transit"],
     icons: [
       {
-        src: "/icon",
+        src: LOGO_PATH,
         sizes: "512x512",
         type: "image/png",
         purpose: "any",
       },
       {
-        src: "/icon",
+        src: LOGO_PATH,
         sizes: "512x512",
         type: "image/png",
         purpose: "maskable",

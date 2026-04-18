@@ -19,9 +19,9 @@ Before production launch, apply:
 ## 2) Configure Supabase Auth URLs (important)
 In Supabase:
 - **Authentication → URL Configuration**
-  - Set **Site URL** to your production domain (e.g. `https://yourapp.vercel.app`)
+  - Set **Site URL** to your production domain (e.g. `https://laharconnect.online`)
   - Add **Redirect URLs** for:
-    - `https://your-domain.com/auth/callback`
+    - `https://laharconnect.online/auth/callback`
 
 If you use a staging domain, add its callback URL too.
 

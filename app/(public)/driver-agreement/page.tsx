@@ -10,7 +10,7 @@ export default function DriverAgreementPage() {
       <h1 className="text-xl font-semibold">Driver Agreement</h1>
 
       <p className="text-sm text-muted-foreground">
-        By posting trips on Lahar ↔ Gwalior Rides, you agree to the following
+        By posting trips on Lahar connect, you agree to the following
         requirements.
       </p>
 

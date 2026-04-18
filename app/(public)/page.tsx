@@ -10,6 +10,7 @@ import {
 import { getActiveCarModels } from "@/lib/car-models-db";
 import { createCarResolver } from "@/lib/car-models";
 import { istDayAfterTomorrowMidnightIso } from "@/lib/departure-ist";
+import { HERO_BANNER_PATH } from "@/lib/branding";
 import Image from "next/image";
 
 type Search = { [key: string]: string | string[] | undefined };
@@ -103,24 +104,34 @@ export default async function HomePage({
 
   return (
     <main className="mx-auto flex max-w-lg flex-col gap-4 px-4 pt-4">
-      <header className="space-y-1">
-        <h1 className="text-xl font-semibold tracking-tight">
-          {"Rides today & tomorrow"}
-        </h1>
-
-        <div className="relative left-1/2 right-1/2 -ml-[50vw] -mr-[50vw] h-[38vh] min-h-[220px] w-screen max-h-[520px]">
+      <header className="space-y-3">
+        <div className="relative left-1/2 right-1/2 -ml-[50vw] -mr-[50vw] h-[36vh] min-h-[210px] w-screen max-h-[520px] overflow-hidden">
           <Image
-            src="/Firefly_Remove%20Hindi%20text%20of%20lahar%20keep%20Lahar%20In%20which%20is%20writtenn%20in%20english%20928299.png"
+            src={HERO_BANNER_PATH}
             alt="Lahar"
             fill
             priority
             sizes="100vw"
             className="object-cover"
           />
+          <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/30 via-black/10 to-transparent" />
         </div>
-        <p className="text-sm text-muted-foreground">
-          Coordination only — agree fare and seats directly with the driver.
-        </p>
+
+        <div className="rounded-2xl border bg-card/70 p-4 shadow-sm backdrop-blur supports-[backdrop-filter]:bg-card/60">
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <div>
+              <p className="text-sm font-semibold tracking-tight">
+                Available trips
+              </p>
+              <p className="text-xs text-muted-foreground">
+                Today & tomorrow only (India time). Tap a card to call the driver.
+              </p>
+            </div>
+            <span className="rounded-full border bg-background px-2.5 py-1 text-xs font-semibold text-emerald-700 dark:text-emerald-400">
+              Live feed
+            </span>
+          </div>
+        </div>
       </header>
 
       <RouteToggle current={direction} />
