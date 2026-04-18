@@ -23,12 +23,13 @@ export const metadata: Metadata = {
   },
   description:
     "Find shared car rides between Lahar and Gwalior. Call drivers instantly.",
+  applicationName: "Lahar ↔ Gwalior Rides",
+  manifest: "/manifest.webmanifest",
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",
     title: "Lahar Gwalior",
   },
-  applicationName: "Lahar ↔ Gwalior Rides",
 };
 
 export const viewport: Viewport = {
