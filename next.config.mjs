@@ -4,7 +4,9 @@ const withPWA = withPWAInit({
   dest: "public",
   cacheOnFrontEndNav: true,
   aggressiveFrontEndNavCaching: true,
+  // Service worker is off in dev (faster reloads). Production build registers SW + precache.
   disable: process.env.NODE_ENV === "development",
+  reloadOnOnline: true,
   workboxOptions: {
     disableDevLogs: true,
   },
