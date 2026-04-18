@@ -68,11 +68,13 @@ export function parseDriverProfileFormData(
 }
 
 export function isDriverProfileIncomplete(p: {
+  full_name?: string | null | undefined;
   phone_number: string | null | undefined;
   car_model: string | null | undefined;
   car_number: string | null | undefined;
 }): boolean {
   return (
+    !(p.full_name ?? "").trim() ||
     !(p.phone_number ?? "").trim() ||
     !(p.car_model ?? "").trim() ||
     !(p.car_number ?? "").trim()

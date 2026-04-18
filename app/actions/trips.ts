@@ -45,7 +45,7 @@ export async function createTrip(formData: FormData) {
     return {
       ok: false,
       error:
-        "Departure must be at least 1 minute from now, on a 15-minute mark (IST).",
+        "Departure must be today or tomorrow (India time), at least 1 minute from now, on :00, :15, :30, or :45.",
     };
   }
 
@@ -78,9 +78,17 @@ export async function createTrip(formData: FormData) {
     revalidatePath("/");
     revalidatePath("/dashboard");
     revalidatePath("/my-trips");
+    return { ok: true as const };
   }
 
-  return { ok: !error, error: error?.message };
+  const msg = error.message ?? "";
+  return {
+    ok: false as const,
+    error:
+      msg.includes("violates") || msg.includes("check")
+        ? "Could not post this trip. Check seats, price, and time, then try again."
+        : msg || "Could not post trip. Please try again.",
+  };
 }
 
 export async function markTripFull(tripId: string) {
@@ -98,9 +106,14 @@ export async function markTripFull(tripId: string) {
     revalidatePath("/");
     revalidatePath("/dashboard");
     revalidatePath("/my-trips");
+    return { ok: true as const };
   }
-
-  return { ok: !error, error: error?.message };
+  return {
+    ok: false as const,
+    error:
+      error.message ||
+      "Could not update this trip. Refresh the page and try again.",
+  };
 }
 
 export async function markTripCompleted(tripId: string) {
@@ -117,7 +130,12 @@ export async function markTripCompleted(tripId: string) {
   if (!error) {
     revalidatePath("/dashboard");
     revalidatePath("/my-trips");
+    return { ok: true as const };
   }
-
-  return { ok: !error, error: error?.message };
+  return {
+    ok: false as const,
+    error:
+      error.message ||
+      "Could not update this trip. Refresh the page and try again.",
+  };
 }

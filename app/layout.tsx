@@ -7,6 +7,7 @@ import {
   SignUpButton,
   UserButton,
 } from "@clerk/nextjs";
+import Link from "next/link";
 import "./globals.css";
 import { cn } from "@/lib/utils";
 
@@ -48,10 +49,16 @@ export default function RootLayout({
         <ClerkProvider>
           <header className="flex items-center justify-end gap-2 border-b bg-background px-4 py-2">
             <Show when="signed-out">
-              <SignInButton />
-              <SignUpButton />
+              <SignInButton>Driver login</SignInButton>
+              <SignUpButton>Register car (sign up)</SignUpButton>
             </Show>
             <Show when="signed-in">
+              <Link
+                href="/dashboard"
+                className="text-sm font-medium text-muted-foreground hover:text-foreground"
+              >
+                Trip updates
+              </Link>
               <UserButton />
             </Show>
           </header>
