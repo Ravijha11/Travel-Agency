@@ -1,7 +1,7 @@
-# Lahar ↔ Gwalior Rides — Overview
+# Lahar connect — Overview
 
 ## What this website is
-**Lahar ↔ Gwalior Rides** is a coordination-only ride sharing directory:
+**Lahar connect** is a coordination-only ride sharing directory:
 
 - **Drivers** post upcoming trips (route, time, seats, price per seat).
 - **Riders** browse trips and contact drivers directly (phone call).

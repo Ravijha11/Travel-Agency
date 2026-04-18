@@ -17,7 +17,7 @@ export default function SuspendedPage() {
         <CardHeader>
           <CardTitle>Account suspended</CardTitle>
           <CardDescription>
-            Your access to Lahar ↔ Gwalior Rides has been restricted. If you
+            Your access to Lahar connect has been restricted. If you
             believe this is a mistake, contact support.
           </CardDescription>
         </CardHeader>

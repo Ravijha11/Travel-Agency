@@ -10,7 +10,7 @@ export default function DisclaimerPage() {
       <h1 className="text-xl font-semibold">Disclaimer</h1>
 
       <p className="text-sm text-muted-foreground">
-        Lahar ↔ Gwalior Rides is a coordination-only directory. The platform is
+        Lahar connect is a coordination-only directory. The platform is
         not a transport operator and does not provide transportation services.
       </p>
 

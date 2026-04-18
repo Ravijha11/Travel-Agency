@@ -10,7 +10,7 @@ export default function TermsPage() {
       <h1 className="text-xl font-semibold">Terms of Service</h1>
 
       <p className="text-sm text-muted-foreground">
-        This website is a coordination-only directory for shared rides between
+        Lahar connect is a coordination-only directory for shared rides between
         Lahar and Gwalior. By using the site, you agree to these terms.
       </p>
 

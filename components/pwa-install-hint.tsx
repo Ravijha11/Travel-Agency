@@ -44,7 +44,7 @@ export function PwaInstallHint() {
     >
       <div className="flex flex-wrap items-center justify-between gap-2">
         <p className="text-sm font-medium leading-snug">
-          Install app for faster access to rides
+          Install Lahar connect for faster access to rides
         </p>
         <div className="flex shrink-0 gap-2">
           <Button type="button" variant="ghost" size="sm" onClick={() => setDismissed(true)}>

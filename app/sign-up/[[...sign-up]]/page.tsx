@@ -1,6 +1,7 @@
 import { SignUp } from "@clerk/nextjs";
 import Link from "next/link";
-import { BadgeCheck, CarTaxiFront, UserPlus } from "lucide-react";
+import { BadgeCheck, UserPlus } from "lucide-react";
+import { BrandLogo } from "@/components/brand-logo";
 import { buttonVariants } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
@@ -16,11 +17,9 @@ export default function SignUpPage() {
 
       <div className="mx-auto flex min-h-dvh max-w-lg flex-col justify-center gap-4 p-4">
         <header className="space-y-2 text-center">
-          <div className="mx-auto inline-flex items-center justify-center rounded-2xl border bg-card/70 px-3 py-2 shadow-sm backdrop-blur">
-            <CarTaxiFront className="mr-2 size-5 text-primary" aria-hidden />
-            <span className="text-sm font-semibold tracking-tight">
-              Driver Registration
-            </span>
+          <div className="mx-auto inline-flex max-w-full items-center justify-center gap-2 rounded-2xl border bg-card/70 px-3 py-2 shadow-sm backdrop-blur">
+            <BrandLogo width={140} height={40} className="h-9 max-h-10 max-w-[10rem]" />
+            <span className="text-sm font-semibold tracking-tight">Driver registration</span>
           </div>
           <h1 className="text-2xl font-semibold tracking-tight">Register your car</h1>
           <p className="text-sm text-muted-foreground">

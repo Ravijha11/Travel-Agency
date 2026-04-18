@@ -1,4 +1,4 @@
-# Lahar ↔ Gwalior Rides
+# Lahar connect
 
 Coordination-only ride sharing directory for trips between Lahar and Gwalior.
 
