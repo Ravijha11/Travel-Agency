@@ -1,12 +1,40 @@
 import type { Metadata } from "next";
+import { jsonLdFaqPage } from "@/lib/seo";
 
 export const metadata: Metadata = {
   title: "FAQ",
 };
 
 export default function FaqPage() {
+  const faqs = [
+    {
+      question: "Do I pay inside the app?",
+      answer:
+        "No. Lahar connect is coordination-only. Riders and drivers agree fare and seats directly.",
+    },
+    {
+      question: "Are seats guaranteed?",
+      answer:
+        "No. Availability is confirmed with the driver when you call.",
+    },
+    {
+      question: "What does “Verified” mean?",
+      answer:
+        "It means the driver has been reviewed by admin. It is not a safety guarantee.",
+    },
+    {
+      question: "I see no trips. What should I do?",
+      answer:
+        "Try switching direction (Lahar → Gwalior or Gwalior → Lahar). Trips show only when drivers post upcoming listings for today or tomorrow (India time).",
+    },
+  ];
+
   return (
     <main className="mx-auto flex max-w-lg flex-col gap-4 px-4 pt-6">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLdFaqPage(faqs)) }}
+      />
       <h1 className="text-xl font-semibold">FAQ</h1>
 
       <section className="space-y-3 text-sm">

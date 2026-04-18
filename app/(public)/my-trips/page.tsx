@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { currentUser } from "@clerk/nextjs/server";
 import { createAdminClient } from "@/utils/supabase/admin";
@@ -14,6 +15,9 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { ROUTE_LABELS, type RouteDirection } from "@/lib/constants";
 import { formatIst12h } from "@/lib/format-ist-time";
+import { noIndexMetadata } from "@/lib/seo";
+
+export const metadata: Metadata = noIndexMetadata("My trips");
 
 export default async function MyTripsPage() {
   const user = await currentUser();
