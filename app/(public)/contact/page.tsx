@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { SITE_URL } from "@/lib/branding";
 
 export const metadata: Metadata = {
   title: "Contact",
@@ -12,12 +13,14 @@ export default function ContactPage() {
         For support, please contact:
       </p>
       <ul className="list-disc space-y-1 pl-5 text-sm text-muted-foreground">
-        <li>Email: <span className="text-foreground">support@example.com</span></li>
-        <li>Phone: <span className="text-foreground">+91-XXXXXXXXXX</span></li>
+        <li>
+          Email:{" "}
+          <span className="text-foreground">support@laharconnect.online</span>
+        </li>
+        <li>Website: <span className="text-foreground">{SITE_URL}</span></li>
       </ul>
       <p className="text-xs text-muted-foreground">
-        Replace these placeholders with your real support contact details before
-        going live.
+        For fastest support, message the same number you call for the ride, or email us.
       </p>
     </main>
   );

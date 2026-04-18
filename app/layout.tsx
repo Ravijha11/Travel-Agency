@@ -10,9 +10,10 @@ import {
 import Link from "next/link";
 import "./globals.css";
 import { cn } from "@/lib/utils";
-import { BRAND_NAME, BRAND_TAGLINE, LOGO_PATH, SITE_URL } from "@/lib/branding";
+import { BRAND_NAME } from "@/lib/branding";
 import { BrandLogo } from "@/components/brand-logo";
 import { buttonVariants } from "@/components/ui/button";
+import { defaultSeoMetadata } from "@/lib/seo";
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -20,43 +21,8 @@ const geistSans = localFont({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL(SITE_URL),
-  title: {
-    default: BRAND_NAME,
-    template: `%s · ${BRAND_NAME}`,
-  },
-  description: BRAND_TAGLINE,
-  applicationName: BRAND_NAME,
+  ...defaultSeoMetadata(),
   manifest: "/manifest.webmanifest",
-  alternates: {
-    canonical: "/",
-  },
-  icons: {
-    icon: [
-      { url: LOGO_PATH, type: "image/png", sizes: "512x512" },
-      { url: "/favicon.ico", sizes: "48x48" },
-    ],
-    apple: [{ url: LOGO_PATH, sizes: "180x180", type: "image/png" }],
-  },
-  openGraph: {
-    type: "website",
-    url: SITE_URL,
-    siteName: BRAND_NAME,
-    title: BRAND_NAME,
-    description: BRAND_TAGLINE,
-    images: [{ url: LOGO_PATH, width: 512, height: 512, alt: BRAND_NAME }],
-  },
-  twitter: {
-    card: "summary",
-    title: BRAND_NAME,
-    description: BRAND_TAGLINE,
-    images: [LOGO_PATH],
-  },
-  appleWebApp: {
-    capable: true,
-    statusBarStyle: "default",
-    title: BRAND_NAME,
-  },
 };
 
 export const viewport: Viewport = {

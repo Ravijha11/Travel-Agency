@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { currentUser } from "@clerk/nextjs/server";
 import { buttonVariants } from "@/components/ui/button";
@@ -15,6 +16,9 @@ import { ClerkSignOutButton } from "@/components/clerk-sign-out-button";
 import { DriverProfileForm } from "@/components/driver-profile-form";
 import { VerifiedBadge } from "@/components/verified-badge";
 import { getActiveCarModels } from "@/lib/car-models-db";
+import { noIndexMetadata } from "@/lib/seo";
+
+export const metadata: Metadata = noIndexMetadata("Account");
 
 export default async function AccountPage() {
   const user = await currentUser();

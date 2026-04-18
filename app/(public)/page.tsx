@@ -11,6 +11,7 @@ import { getActiveCarModels } from "@/lib/car-models-db";
 import { createCarResolver } from "@/lib/car-models";
 import { istDayAfterTomorrowMidnightIso } from "@/lib/departure-ist";
 import { HERO_BANNER_PATH } from "@/lib/branding";
+import { jsonLdLocalBusiness, jsonLdWebsite } from "@/lib/seo";
 import Image from "next/image";
 
 type Search = { [key: string]: string | string[] | undefined };
@@ -104,6 +105,13 @@ export default async function HomePage({
 
   return (
     <main className="mx-auto flex max-w-lg flex-col gap-4 px-4 pt-4">
+      <script
+        type="application/ld+json"
+        // JSON-LD for local search (Lahar/Bhind/MP + route intent keywords)
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify([jsonLdWebsite(), jsonLdLocalBusiness()]),
+        }}
+      />
       <header className="space-y-3">
         <div className="relative left-1/2 right-1/2 -ml-[50vw] -mr-[50vw] h-[36vh] min-h-[210px] w-screen max-h-[520px] overflow-hidden">
           <Image

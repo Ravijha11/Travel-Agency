@@ -43,7 +43,7 @@ export default function PrivacyPage() {
       <section className="space-y-2 text-sm">
         <h2 className="text-base font-semibold">Contact</h2>
         <p className="text-muted-foreground">
-          Replace this with your privacy contact details: privacy@example.com
+          Privacy contact: privacy@laharconnect.online
         </p>
       </section>
 
