@@ -28,6 +28,9 @@ export function defaultSeoMetadata(): Metadata {
     },
     description: BRAND_TAGLINE,
     applicationName: BRAND_NAME,
+    verification: {
+      google: "rsB7yd4etDJpr4HOwTsU0DUMPPhhxe76igsmAYkcBXk",
+    },
     keywords: [...SEO_KEYWORDS],
     alternates: {
       canonical: "/",
