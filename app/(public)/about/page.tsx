@@ -1,7 +1,10 @@
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "About",
+  title: "About Lahar Connect",
+  description:
+    "Lahar Connect is a coordination-only directory for shared rides between Lahar and Gwalior. Browse listings and call drivers directly.",
+  alternates: { canonical: "/about" },
 };
 
 export default function AboutPage() {

@@ -1,5 +1,6 @@
 import "server-only";
 
+import { cache } from "react";
 import { createClient } from "@/utils/supabase/server";
 
 export type CarModelRow = {
@@ -9,7 +10,7 @@ export type CarModelRow = {
   is_active: boolean;
 };
 
-export async function getActiveCarModels(): Promise<CarModelRow[]> {
+export const getActiveCarModels = cache(async (): Promise<CarModelRow[]> => {
   const supabase = await createClient();
   const { data } = await supabase
     .from("car_models")
@@ -17,5 +18,5 @@ export async function getActiveCarModels(): Promise<CarModelRow[]> {
     .eq("is_active", true)
     .order("label", { ascending: true });
   return (data ?? []) as CarModelRow[];
-}
+});
 

@@ -2,6 +2,9 @@ import type { Metadata } from "next";
 
 export const metadata: Metadata = {
   title: "Terms of Service",
+  description:
+    "Terms for using Lahar Connect (coordination-only directory for Lahar↔Gwalior shared rides).",
+  alternates: { canonical: "/terms" },
 };
 
 export default function TermsPage() {
@@ -43,7 +46,7 @@ export default function TermsPage() {
       <section className="space-y-2 text-sm">
         <h2 className="text-base font-semibold">Contact</h2>
         <p className="text-muted-foreground">
-          Replace this with your company contact details: support@example.com
+          Support: support@laharconnect.online
         </p>
       </section>
 

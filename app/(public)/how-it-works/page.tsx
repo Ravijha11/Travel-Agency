@@ -2,6 +2,9 @@ import type { Metadata } from "next";
 
 export const metadata: Metadata = {
   title: "How it works",
+  description:
+    "How Lahar Connect works for riders and drivers. Browse trips, call to book seats, and drivers can register to post listings.",
+  alternates: { canonical: "/how-it-works" },
 };
 
 export default function HowItWorksPage() {
@@ -14,7 +17,7 @@ export default function HowItWorksPage() {
         <ol className="list-decimal space-y-1 pl-5 text-sm text-muted-foreground">
           <li>Open the Home feed and choose direction.</li>
           <li>Pick a trip that matches your time and seats.</li>
-          <li>Tap “Call now” and coordinate directly with the driver.</li>
+          <li>Tap “Book seat (Call)” and coordinate directly with the driver.</li>
         </ol>
       </section>
 

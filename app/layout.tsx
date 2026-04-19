@@ -29,7 +29,6 @@ export const viewport: Viewport = {
   themeColor: "#166534",
   width: "device-width",
   initialScale: 1,
-  maximumScale: 1,
 };
 
 export default function RootLayout({
@@ -54,7 +53,7 @@ export default function RootLayout({
                 priority
                 width={280}
                 height={80}
-                className="h-16 w-auto max-w-[min(100%,26rem)] sm:h-12"
+                className="h-12 w-auto max-w-[min(100%,20rem)] sm:h-12 sm:max-w-[min(100%,26rem)]"
               />
               <span className="sr-only">{BRAND_NAME}</span>
             </Link>
@@ -67,8 +66,8 @@ export default function RootLayout({
                   <SignUpButton>
                     <span
                       className={cn(
-                        buttonVariants({ variant: "default", size: "lg" }),
-                        "h-11 flex-1 justify-center sm:flex-none",
+                        buttonVariants({ variant: "default", size: "default" }),
+                        "h-10 flex-1 justify-center sm:flex-none",
                       )}
                     >
                       Register your car (Sign up)
@@ -77,8 +76,8 @@ export default function RootLayout({
                   <SignInButton>
                     <span
                       className={cn(
-                        buttonVariants({ variant: "outline", size: "lg" }),
-                        "h-11 flex-1 justify-center sm:flex-none",
+                        buttonVariants({ variant: "outline", size: "default" }),
+                        "h-10 flex-1 justify-center sm:flex-none",
                       )}
                     >
                       Already registered? Sign in
@@ -91,8 +90,8 @@ export default function RootLayout({
                   <Link
                     href="/dashboard"
                     className={cn(
-                      buttonVariants({ variant: "secondary", size: "lg" }),
-                      "h-11",
+                      buttonVariants({ variant: "secondary", size: "default" }),
+                      "h-10",
                     )}
                   >
                     Trip updates

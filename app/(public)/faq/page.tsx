@@ -3,6 +3,9 @@ import { jsonLdFaqPage } from "@/lib/seo";
 
 export const metadata: Metadata = {
   title: "FAQ",
+  description:
+    "Frequently asked questions about Lahar Connect shared rides between Lahar and Gwalior.",
+  alternates: { canonical: "/faq" },
 };
 
 export default function FaqPage() {

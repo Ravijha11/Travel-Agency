@@ -74,7 +74,7 @@ async function upsertTelegramProfile(supabase, phone, fullName, carModel) {
   const id = syntheticDriverId(phone);
   const row = {
     id,
-    full_name: (fullName || "").trim() || "Driver",
+    full_name: (fullName || "").trim() || "Lahar Connect Driver",
     phone_number: phone,
     role: "driver",
     is_restricted: false,
@@ -86,6 +86,70 @@ async function upsertTelegramProfile(supabase, phone, fullName, carModel) {
     onConflict: "id",
   });
   return { error, id };
+}
+
+async function findRealProfileByPhone(supabase, phone) {
+  const { data, error } = await supabase
+    .from("profiles")
+    .select("id, full_name, phone_number, car_model, car_number")
+    .eq("phone_number", phone)
+    .not("id", "like", "tg_%")
+    .limit(1)
+    .maybeSingle();
+  if (error) {
+    console.error("findRealProfileByPhone", error.message);
+    return null;
+  }
+  return data ?? null;
+}
+
+async function findDriverDirectoryByPhone(supabase, phone) {
+  const { data, error } = await supabase
+    .from("driver_directory")
+    .select(
+      "phone_number, display_name, car_model, car_number, default_seats, default_price_per_seat, is_active",
+    )
+    .eq("phone_number", phone)
+    .eq("is_active", true)
+    .maybeSingle();
+  if (error) {
+    console.error("findDriverDirectoryByPhone", error.message);
+    return null;
+  }
+  return data ?? null;
+}
+
+function pickSeats(parsedSeats, directorySeats) {
+  if (
+    parsedSeats != null &&
+    parsedSeats >= 1 &&
+    parsedSeats <= 12
+  ) {
+    return parsedSeats;
+  }
+  if (
+    directorySeats != null &&
+    !Number.isNaN(Number(directorySeats)) &&
+    Number(directorySeats) >= 1 &&
+    Number(directorySeats) <= 12
+  ) {
+    return Number(directorySeats);
+  }
+  return 4;
+}
+
+function pickPrice(parsedPrice, directoryPrice) {
+  if (parsedPrice != null && !Number.isNaN(parsedPrice) && parsedPrice >= 0) {
+    return parsedPrice;
+  }
+  if (
+    directoryPrice != null &&
+    !Number.isNaN(Number(directoryPrice)) &&
+    Number(directoryPrice) >= 0
+  ) {
+    return Number(directoryPrice);
+  }
+  return 250;
 }
 
 async function findTelegramTripSameDay(
@@ -127,34 +191,53 @@ async function saveParsedTrips(supabase, parsed, meta) {
     parsed.carMatchQuery,
   );
 
-  const seats =
-    parsed.availableSeats != null &&
-    parsed.availableSeats >= 1 &&
-    parsed.availableSeats <= 12
-      ? parsed.availableSeats
-      : 4;
-  const price =
-    parsed.pricePerSeat != null &&
-    !Number.isNaN(parsed.pricePerSeat) &&
-    parsed.pricePerSeat >= 0
-      ? parsed.pricePerSeat
-      : 0;
-
-  const displayName = pickProfileDisplayName(meta, parsed);
-  const carModel = resolvedCarLabel || "Other";
-
   const { directions, phones, departure, isUrgent, isDaily } = parsed;
 
   for (const phone of phones) {
-    const { error: pe, id: driverId } = await upsertTelegramProfile(
-      supabase,
-      phone,
-      displayName,
-      carModel,
-    );
-    if (pe) {
-      console.error("profile upsert", pe);
-      throw pe;
+    const real = await findRealProfileByPhone(supabase, phone);
+    const directory = real ? null : await findDriverDirectoryByPhone(supabase, phone);
+
+    const displayName =
+      (real?.full_name || "").trim() ||
+      (directory?.display_name || "").trim() ||
+      pickProfileDisplayName(meta, parsed) ||
+      "Lahar Connect Driver";
+
+    const carModel =
+      (real?.car_model || "").trim() ||
+      (directory?.car_model || "").trim() ||
+      resolvedCarLabel ||
+      "Other";
+
+    const carNumber =
+      (real?.car_number || "").trim() ||
+      (directory?.car_number || "").trim() ||
+      "";
+
+    const seats = pickSeats(parsed.availableSeats, directory?.default_seats);
+    const price = pickPrice(parsed.pricePerSeat, directory?.default_price_per_seat);
+
+    let driverId = real?.id || "";
+    if (!driverId) {
+      const { error: pe, id } = await upsertTelegramProfile(
+        supabase,
+        phone,
+        displayName,
+        carModel,
+      );
+      if (pe) {
+        console.error("profile upsert", pe);
+        throw pe;
+      }
+      driverId = id;
+
+      if (carNumber) {
+        const { error: ce } = await supabase
+          .from("profiles")
+          .update({ car_number: carNumber })
+          .eq("id", driverId);
+        if (ce) console.error("profile car_number update", ce.message);
+      }
     }
 
     for (const routeDirection of directions) {

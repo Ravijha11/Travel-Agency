@@ -2,6 +2,9 @@ import type { Metadata } from "next";
 
 export const metadata: Metadata = {
   title: "Disclaimer",
+  description:
+    "Lahar Connect is a coordination-only directory. Riders and drivers coordinate directly; the platform does not provide transport services.",
+  alternates: { canonical: "/disclaimer" },
 };
 
 export default function DisclaimerPage() {
