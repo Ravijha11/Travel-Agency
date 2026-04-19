@@ -20,7 +20,7 @@ The website expects each trip to reference `profiles.id` (`driver_id`). For Tele
 - `id`: `tg_<10-digit phone>`
 - `phone_number`: the same number (calls from the site use this)
 - `is_verified`: `true` so listings behave like trusted feed entries
-- `full_name`: **Telegram display name** of the person who posted in the drivers group (`first_name` + `last_name`, or `@username`). In **owner DM** backups, the name parsed from the message (e.g. “मिश्रा जी”) is preferred when present, otherwise the owner’s Telegram name.
+- `full_name`: **Message title first** (e.g. “जय दादरौआ सरकार टूर/ट्रेवलर्स”), then **“…जी”** style names, then **Telegram display name** of the poster (`first_name` + `last_name`, or `@username`). In **owner DM** backups, message names are preferred, then the owner’s Telegram name. If nothing is found, the profile shows **Driver**.
 - `car_model`: matched against Supabase **`car_models`** (`label` + `aliases`, same fuzzy rules as the website). Wrong spellings often still map to the correct catalog row so feed **photos** match. If the catalog is empty, `Other` is stored.
 
 ### Parsed from the message (trips + defaults)

@@ -14,7 +14,7 @@ import {
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { ROUTE_LABELS, type RouteDirection } from "@/lib/constants";
-import { formatIst12h } from "@/lib/format-ist-time";
+import { formatIst12hTodayTomorrow } from "@/lib/format-ist-time";
 import { noIndexMetadata } from "@/lib/seo";
 
 export const metadata: Metadata = noIndexMetadata("My trips");
@@ -91,7 +91,7 @@ export default async function MyTripsPage() {
                     </Badge>
                   </div>
                   <CardDescription>
-                    {formatIst12h(t.departure_time)}
+                    {formatIst12hTodayTomorrow(t.departure_time)}
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="text-sm text-muted-foreground">

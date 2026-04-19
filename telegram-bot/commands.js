@@ -31,11 +31,20 @@ function formatPrivateSavedSummary(saved, parsed) {
     lines.push(`📍 Route: ${routeLine(dir)}`);
     lines.push(`📞 Phones: ${[...new Set(rows.map((r) => r.phone))].join(", ")}`);
   }
+  if (parsed.profileNameHint) {
+    lines.push(`👤 Name: ${parsed.profileNameHint}`);
+  }
   const dep = parsed.departure;
   if (dep && !Number.isNaN(dep.getTime())) {
-    let timeLine = `🕐 Departure: ${formatIstClockLabel(dep.toISOString())}`;
-    if (parsed.end && !Number.isNaN(parsed.end.getTime())) {
-      timeLine += ` → ${formatIstClockLabel(parsed.end.toISOString())}`;
+    let timeLine;
+    if (
+      parsed.end &&
+      !Number.isNaN(parsed.end.getTime()) &&
+      parsed.end.getTime() < dep.getTime()
+    ) {
+      timeLine = `🕐 ${formatIstClockLabel(parsed.end.toISOString())} → ${formatIstClockLabel(dep.toISOString())}`;
+    } else {
+      timeLine = `🕐 Departure: ${formatIstClockLabel(dep.toISOString())}`;
     }
     lines.push(timeLine);
     lines.push(`📅 Date: ${formatIstDateLabel(dep.toISOString())}`);

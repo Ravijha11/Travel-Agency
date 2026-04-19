@@ -33,7 +33,7 @@ function stripPhones(text) {
 }
 
 function detectDirections(text) {
-  const t = text;
+  const t = text.replace(/\s+/g, " ");
   let toGw = false;
   let toLh = false;
   for (const r of RE_LAHAR_TO_GW) {
@@ -154,6 +154,9 @@ function extractPricePerSeat(text) {
     /\b(?:seat|सीट)\s*(?:price|रेट|दाम)?[:.\s]*(\d{2,5})\b/i,
     /\b(?:price|प्राइस)[:.\s]*(\d{2,5})\b/i,
     /\b(\d{2,5})\s*\/\s*seat\b/i,
+    /\b(?:प्रति\s*व्यक्ति|per\s*person)[:.\s]*(\d{2,5})\b/i,
+    /\b(?:रुपये|रूपये)\s+(?:में|mein)\s+(\d{2,5})\b/i,
+    /\b(?:only|sirf|सिर्फ)\s+(\d{2,5})\b/i,
   ];
   for (const re of patterns) {
     const m = t.match(re);
@@ -172,7 +175,9 @@ function detectCar(text) {
   if (/ertiga/i.test(text)) carType = "Ertiga";
   else if (/innova/i.test(text)) carType = "Innova";
   else if (/sumo/i.test(text)) carType = "Sumo";
-  else if (/travell?er|ट्रेवलर|ट्रैवलर/i.test(text))
+  else if (
+    /travell?er|ट्रेवलर|ट्रैवलर|ट्रेवलर्स|टूर\/ट्रेवलर/i.test(text)
+  )
     carType = "Traveller";
   else if (/luxury|लग्जरी/i.test(text)) carType = "Luxury";
   else if (/swift|शिप्ट|स्विफ्ट|dzire|डिजायर|डिज़ायर/i.test(text))
@@ -185,9 +190,54 @@ function detectCar(text) {
   return { carType, isAc };
 }
 
+/** Line that likely describes the vehicle (for catalog fuzzy match). */
+function extractCarLineSnippet(text) {
+  for (const line of text.split(/[\n\r]+/)) {
+    const l = line.trim();
+    if (
+      /शिप्ट|स्विफ्ट|swift|dzire|डिजायर|innova|ertiga|sumo|travell|ट्रेवल|लग्जरी|luxury|गाड़ी|ac\b|एसी|बोलेरो|crysta|क्रिस्टा/i.test(
+        l,
+      )
+    ) {
+      return l.slice(0, 120);
+    }
+  }
+  return "";
+}
+
+/** Business / operator title (first substantive line, e.g. “जय दादरौआ सरकार…”). */
+function extractBusinessName(text) {
+  const lines = text
+    .split(/[\n\r]+/)
+    .map((l) => l.trim())
+    .filter(Boolean);
+  for (const line of lines) {
+    if (line.length < 4 || line.length > 140) continue;
+    const digits = (line.match(/\d/g) || []).length;
+    if (digits >= 10 && digits / Math.max(line.length, 1) > 0.35) continue;
+    if (/^[\d\s,|+/-]+$/.test(line)) continue;
+    if (
+      /^(lahar|gwalior|लहार|लाहर|लहर|ग्वालियर)/i.test(line) &&
+      /(to|से)/i.test(line) &&
+      line.length < 72
+    )
+      continue;
+    if (/^(डेली|daily)\s*(serv|सर्विस)?$/i.test(line)) continue;
+    if (/^अभी\s+सुबह/i.test(line) && /बजे|[:.]/.test(line)) continue;
+    if (/^नोट\b|^Note\b/i.test(line)) continue;
+    if (/संपर्क|contact|call now/i.test(line) && /\d{10}/.test(line)) continue;
+    if (/यात्री|yatri/i.test(line) && /\d/.test(line) && line.length < 50)
+      continue;
+    return line.replace(/\s+/g, " ").trim();
+  }
+  return "";
+}
+
 /** String passed to catalog resolver (admin `label` + `aliases` + fuzzy). */
 function buildCarMatchQuery(text, { carType }) {
-  if (carType) return carType;
+  const carLine = extractCarLineSnippet(text);
+  const parts = [carType, carLine].filter(Boolean);
+  if (parts.length) return parts.join(" · ").slice(0, 220);
   const stripped = stripPhones(text).replace(/\s+/g, " ").trim();
   return stripped.slice(0, 200);
 }
@@ -246,12 +296,19 @@ function parseTripMessage(raw, opts = {}) {
     if (n) driverNames[p] = n;
   }
 
+  const businessName = extractBusinessName(text);
+  const jiName =
+    Object.values(driverNames).find((v) => v && String(v).trim()) || "";
+  const profileNameHint = [businessName, jiName].find(Boolean) || "";
+
   return {
     ok: true,
     reasons,
     directions,
     phones,
     driverNames,
+    businessName,
+    profileNameHint,
     departure,
     end,
     carType,
@@ -270,4 +327,5 @@ module.exports = {
   detectDirections,
   extractSeats,
   extractPricePerSeat,
+  extractBusinessName,
 };
