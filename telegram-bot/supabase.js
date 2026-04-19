@@ -31,14 +31,18 @@ async function fetchCarModelsCached(supabase) {
 }
 
 function pickProfileDisplayName(meta, parsed) {
-  const fromText =
+  const msg =
+    (parsed.profileNameHint || "").trim() ||
+    (parsed.businessName || "").trim();
+  const ji =
     Object.values(parsed.driverNames || {}).find((v) => v && String(v).trim()) ||
     "";
+  const fromMessage = msg || ji;
   const tg = (meta.telegramDisplayName || "").trim();
   if (meta.listingSource === "telegram_group") {
-    return tg || fromText || "Telegram driver";
+    return fromMessage || tg || "";
   }
-  return fromText || tg || "Telegram driver";
+  return fromMessage || tg || "";
 }
 
 function makeSupabase() {
@@ -70,7 +74,7 @@ async function upsertTelegramProfile(supabase, phone, fullName, carModel) {
   const id = syntheticDriverId(phone);
   const row = {
     id,
-    full_name: fullName || "Telegram driver",
+    full_name: (fullName || "").trim() || "Driver",
     phone_number: phone,
     role: "driver",
     is_restricted: false,

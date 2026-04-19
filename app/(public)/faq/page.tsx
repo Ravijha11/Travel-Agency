@@ -27,6 +27,11 @@ export default function FaqPage() {
       answer:
         "Try switching direction (Lahar → Gwalior or Gwalior → Lahar). Trips show only when drivers post upcoming listings for today or tomorrow (India time).",
     },
+    {
+      question: "Do drivers use a Telegram bot?",
+      answer:
+        "Yes. Verified drivers can be added to the Lahar Connect drivers Telegram group; a bot reads trip messages (Hindi or English), saves listings to the same database as the website, and riders see them on laharconnect.online. Drivers can also use /trips and /delete_last in the group to manage bot-posted listings.",
+    },
   ];
 
   return (
@@ -63,6 +68,15 @@ export default function FaqPage() {
           <p className="text-muted-foreground">
             Try switching direction. Trips only show when drivers post upcoming
             listings.
+          </p>
+        </div>
+        <div>
+          <h2 className="font-semibold">Do drivers use a Telegram bot?</h2>
+          <p className="text-muted-foreground">
+            Yes. Drivers in the official Telegram group can post normal trip
+            messages; the bot parses them and publishes trips to this site
+            (today and tomorrow, India time). Use /trips and /delete_last in
+            the group for bot-posted listings.
           </p>
         </div>
       </section>

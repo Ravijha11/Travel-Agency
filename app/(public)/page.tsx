@@ -12,6 +12,8 @@ import { createCarResolver } from "@/lib/car-models";
 import { istDayAfterTomorrowMidnightIso } from "@/lib/departure-ist";
 import { HERO_BANNER_PATH } from "@/lib/branding";
 import { jsonLdLocalBusiness, jsonLdWebsite } from "@/lib/seo";
+import { formatIst12hTodayTomorrow } from "@/lib/format-ist-time";
+import { IstLiveClock } from "@/components/ist-live-clock";
 import Image from "next/image";
 
 type Search = { [key: string]: string | string[] | undefined };
@@ -23,16 +25,6 @@ function parseDirection(searchParams: Search): RouteDirection {
     return dir as RouteDirection;
   }
   return "lahar_to_gwalior";
-}
-
-function formatTime(iso: string) {
-  return new Intl.DateTimeFormat("en-IN", {
-    timeZone: "Asia/Kolkata",
-    weekday: "short",
-    hour: "numeric",
-    minute: "2-digit",
-    hour12: true,
-  }).format(new Date(iso));
 }
 
 function formatPrice(amount: number) {
@@ -135,9 +127,15 @@ export default async function HomePage({
                 Today & tomorrow only (India time). Tap a card to call the driver.
               </p>
             </div>
-            <span className="rounded-full border bg-background px-2.5 py-1 text-xs font-semibold text-emerald-700 dark:text-emerald-400">
-              Live feed
-            </span>
+            <div className="flex flex-col items-end gap-1 text-right">
+              <span className="rounded-full border bg-background px-2.5 py-1 text-xs font-semibold text-emerald-700 dark:text-emerald-400">
+                Live feed
+              </span>
+              <p className="text-[11px] text-muted-foreground">
+                India now:{" "}
+                <IstLiveClock />
+              </p>
+            </div>
           </div>
         </div>
       </header>
@@ -165,7 +163,7 @@ export default async function HomePage({
                 key={trip.id}
                 tripId={trip.id}
                 departureIso={trip.departure_time}
-                departureLabel={formatTime(trip.departure_time)}
+                departureLabel={formatIst12hTodayTomorrow(trip.departure_time)}
                 carModel={profile?.car_model ?? ""}
                 carNumber={profile?.car_number ?? ""}
                 carLabel={car.label}

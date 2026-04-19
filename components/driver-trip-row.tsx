@@ -13,7 +13,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { ROUTE_LABELS, type RouteDirection } from "@/lib/constants";
-import { formatIst12h } from "@/lib/format-ist-time";
+import { formatIst12hTodayTomorrow } from "@/lib/format-ist-time";
 
 type Trip = {
   id: string;
@@ -57,7 +57,9 @@ export function DriverTripRow({ trip }: { trip: Trip }) {
         </Badge>
       </CardHeader>
       <CardContent className="space-y-1 text-sm text-muted-foreground">
-        <p className="text-foreground">{formatIst12h(trip.departure_time)}</p>
+        <p className="text-foreground">
+          {formatIst12hTodayTomorrow(trip.departure_time)}
+        </p>
         <p>
           {trip.origin} → {trip.destination}
         </p>

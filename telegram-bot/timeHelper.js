@@ -171,6 +171,11 @@ function extractFirstClock(text) {
   const range = text.match(
     /(\d{1,2})\s*[:.]\s*(\d{2})\s*(?:बजे)?\s*(?:से|se|-)\s*(\d{1,2})\s*[:.]\s*(\d{2})/i,
   );
+  const rangeBaje = !range
+    ? text.match(
+        /(\d{1,2})\s*(?:बजे|baje)?\s*(?:से|se|-)\s*(\d{1,2})\s*(?:बजे|baje)/i,
+      )
+    : null;
   let h;
   let m;
   let endH;
@@ -180,6 +185,11 @@ function extractFirstClock(text) {
     m = Number(range[2]);
     endH = Number(range[3]);
     endM = Number(range[4]);
+  } else if (rangeBaje) {
+    h = Number(rangeBaje[1]);
+    m = 0;
+    endH = Number(rangeBaje[2]);
+    endM = 0;
   } else {
     const simple = text.match(/(\d{1,2})\s*[:.]\s*(\d{2})/);
     if (!simple) return null;
@@ -252,28 +262,45 @@ function computeDepartureFromMessage(text, now = new Date()) {
   if (!clock) return { departure: null, isUrgent: false, end: null };
 
   const tomorrow = /\bkal\b|कल\b/i.test(text);
-  const departure = nextIstOccurrence(now, clock.hour24, clock.minute, {
+  const hints = {
     morning: clock.morningHint,
     afternoon: clock.afternoonHint,
     tomorrow,
-  });
+  };
 
+  const hasRangeEnd =
+    clock.endHour24 != null &&
+    clock.endMinute != null &&
+    !Number.isNaN(clock.endHour24) &&
+    !Number.isNaN(clock.endMinute);
+
+  let departure;
+  /** When a range exists: window start (earlier clock) for display; main `departure` is the later end time. */
   let end = null;
-  if (clock.endHour24 != null && clock.endMinute != null) {
-    const depYmd = istCalendarDateString(departure);
-    end = istLocalDateTimeToUtcDate(
-      depYmd,
+
+  if (hasRangeEnd) {
+    departure = nextIstOccurrence(
+      now,
       clock.endHour24,
       clock.endMinute,
+      hints,
     );
-    if (end.getTime() <= departure.getTime()) {
-      const nextY = istAddCalendarDays(depYmd, 1);
-      end = istLocalDateTimeToUtcDate(
-        nextY,
-        clock.endHour24,
-        clock.endMinute,
+    const depYmd = istCalendarDateString(departure);
+    let windowStart = istLocalDateTimeToUtcDate(
+      depYmd,
+      clock.hour24,
+      clock.minute,
+    );
+    if (windowStart.getTime() >= departure.getTime()) {
+      windowStart = istLocalDateTimeToUtcDate(
+        istAddCalendarDays(depYmd, -1),
+        clock.hour24,
+        clock.minute,
       );
     }
+    end = windowStart;
+  } else {
+    departure = nextIstOccurrence(now, clock.hour24, clock.minute, hints);
   }
 
   const isUrgent =
