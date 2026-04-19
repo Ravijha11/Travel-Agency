@@ -39,7 +39,12 @@ export default function SignInPage() {
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="flex items-center justify-center">
-              <SignIn routing="path" path="/sign-in" />
+              <SignIn
+                routing="path"
+                path="/sign-in"
+                forceRedirectUrl="/dashboard"
+                signUpFallbackRedirectUrl="/dashboard"
+              />
             </div>
 
             <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">

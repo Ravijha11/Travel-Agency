@@ -40,7 +40,10 @@ export default function RootLayout({
   return (
     <html lang="en" className={cn("font-sans", geistSans.variable)}>
       <body className="min-h-dvh antialiased">
-        <ClerkProvider>
+        <ClerkProvider
+          signInFallbackRedirectUrl="/dashboard"
+          signUpFallbackRedirectUrl="/dashboard"
+        >
           <header className="border-b bg-background">
             <div className="mx-auto flex max-w-3xl flex-col gap-2 px-4 py-2 sm:flex-row sm:items-center sm:justify-between">
             <Link

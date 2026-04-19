@@ -40,7 +40,13 @@ export default function SignUpPage() {
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="flex items-center justify-center">
-              <SignUp routing="path" path="/sign-up" />
+              <SignUp
+                routing="path"
+                path="/sign-up"
+                forceRedirectUrl="/dashboard"
+                signInFallbackRedirectUrl="/dashboard"
+                signInForceRedirectUrl="/dashboard"
+              />
             </div>
 
             <div className="rounded-lg border bg-muted/40 p-3 text-xs text-muted-foreground">

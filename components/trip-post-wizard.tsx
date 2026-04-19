@@ -1,6 +1,8 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import { CheckCircle2, PartyPopper } from "lucide-react";
 import { createTrip } from "@/app/actions/trips";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -24,8 +26,11 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { cn } from "@/lib/utils";
 
 const steps = ["Route & time", "Seats & price", "Confirm"] as const;
+
+const stepsHi = ["रूट और समय", "सीट और किराया", "कन्फर्म"] as const;
 
 type DepParts = { dateYmd: string; hour: number; minute: QuarterMinute };
 
@@ -44,7 +49,22 @@ function clampBooking(floor: DepParts, p: DepParts): DepParts {
   return clampDeparture(floor, dateYmd, p.hour, p.minute);
 }
 
+function TimePickSkeleton() {
+  return (
+    <div
+      className="grid animate-pulse grid-cols-2 gap-3 sm:grid-cols-4"
+      aria-hidden
+    >
+      <div className="col-span-2 h-10 rounded-md bg-muted sm:col-span-1" />
+      <div className="h-10 rounded-md bg-muted" />
+      <div className="h-10 rounded-md bg-muted" />
+      <div className="col-span-2 h-10 rounded-md bg-muted sm:col-span-1" />
+    </div>
+  );
+}
+
 export function TripPostWizard() {
+  const router = useRouter();
   const [step, setStep] = useState(0);
   const [routeDirection, setRouteDirection] =
     useState<RouteDirection>("lahar_to_gwalior");
@@ -53,13 +73,20 @@ export function TripPostWizard() {
   const [dep, setDep] = useState<DepParts | null>(null);
   const [seats, setSeats] = useState("3");
   const [price, setPrice] = useState("200");
-  const [message, setMessage] = useState<string | null>(null);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     const floor = nextQuarterHourAfterNow();
     setDep(clampBooking(floor, floor));
   }, []);
+
+  useEffect(() => {
+    if (!successMessage) return;
+    const t = window.setTimeout(() => setSuccessMessage(null), 12_000);
+    return () => window.clearTimeout(t);
+  }, [successMessage]);
 
   function applyDirection(dir: RouteDirection) {
     setRouteDirection(dir);
@@ -79,17 +106,17 @@ export function TripPostWizard() {
   function snapToNextSlot() {
     const floor = nextQuarterHourAfterNow();
     setDep(clampBooking(floor, floor));
-    setMessage(null);
+    setErrorMessage(null);
   }
 
   async function onConfirm() {
     if (!dep) return;
     setLoading(true);
-    setMessage(null);
+    setErrorMessage(null);
     const departureIso = istLocalDateTimeToIso(dep.dateYmd, dep.hour, dep.minute);
     if (!isDepartureAllowedIso(departureIso)) {
       setLoading(false);
-      setMessage(
+      setErrorMessage(
         "Departure must be today or tomorrow (India time), at least 1 minute ahead, on :00, :15, :30, or :45.",
       );
       return;
@@ -106,17 +133,20 @@ export function TripPostWizard() {
       res = await createTrip(fd);
     } catch {
       setLoading(false);
-      setMessage(
+      setErrorMessage(
         "Network error. Check your connection and try again in a moment.",
       );
       return;
     }
     setLoading(false);
     if (!res.ok) {
-      setMessage(res.error ?? "Could not post trip");
+      setErrorMessage(res.error ?? "Could not post trip");
       return;
     }
-    setMessage(null);
+    setErrorMessage(null);
+    setSuccessMessage(
+      "Published! Your trip will appear on the home feed. / पब्लिश हो गया — अब होम फीड पर दिखेगा।",
+    );
     setStep(0);
     {
       const floor = nextQuarterHourAfterNow();
@@ -125,6 +155,7 @@ export function TripPostWizard() {
     setSeats("3");
     setPrice("200");
     applyDirection("lahar_to_gwalior");
+    router.refresh();
   }
 
   const minDate = floorNow().dateYmd;
@@ -146,19 +177,52 @@ export function TripPostWizard() {
     );
 
   return (
-    <Card>
+    <Card className="overflow-hidden border-emerald-500/20 shadow-lg shadow-emerald-500/10">
+      <div className="h-1.5 bg-gradient-to-r from-emerald-500 via-sky-500 to-violet-500" aria-hidden />
+      {successMessage ? (
+        <div className="flex items-start gap-2 border-b border-emerald-500/25 bg-emerald-500/10 px-4 py-3 text-sm text-emerald-900 dark:text-emerald-100">
+          <PartyPopper className="mt-0.5 size-5 shrink-0" aria-hidden />
+          <p role="status">{successMessage}</p>
+        </div>
+      ) : null}
       <CardHeader>
-        <CardTitle>Post a trip</CardTitle>
+        <CardTitle className="flex flex-wrap items-center gap-2">
+          Post a trip
+          <span className="text-sm font-normal text-muted-foreground">/ ट्रिप पोस्ट</span>
+        </CardTitle>
         <CardDescription>
-          Step {step + 1} of {steps.length}: {steps[step]}. You can only list
-          departures for today or tomorrow (India time).
+          Step {step + 1} of {steps.length}: {steps[step]} · {stepsHi[step]}. Today or tomorrow only
+          (India time).
         </CardDescription>
+        <ol className="flex flex-wrap gap-2 pt-1" aria-label="Steps">
+          {steps.map((label, i) => (
+            <li key={label}>
+              <span
+                className={cn(
+                  "inline-flex items-center gap-1 rounded-full border px-2.5 py-1 text-xs font-medium transition-colors",
+                  i === step
+                    ? "border-primary bg-primary/15 text-primary"
+                    : i < step
+                      ? "border-emerald-500/40 bg-emerald-500/10 text-emerald-800 dark:text-emerald-200"
+                      : "border-muted bg-muted/40 text-muted-foreground",
+                )}
+              >
+                {i < step ? (
+                  <CheckCircle2 className="size-3.5 shrink-0" aria-hidden />
+                ) : (
+                  <span className="tabular-nums">{i + 1}</span>
+                )}
+                {label}
+              </span>
+            </li>
+          ))}
+        </ol>
       </CardHeader>
       <CardContent className="space-y-4">
         {step === 0 ? (
           <div className="space-y-4">
             <div className="space-y-2">
-              <Label>Direction</Label>
+              <Label>Direction / दिशा</Label>
               <Tabs
                 value={routeDirection}
                 onValueChange={(v) => applyDirection(v as RouteDirection)}
@@ -174,7 +238,7 @@ export function TripPostWizard() {
               </Tabs>
             </div>
             <div className="space-y-2">
-              <Label htmlFor="origin">Origin</Label>
+              <Label htmlFor="origin">Origin / शुरुआत</Label>
               <Input
                 id="origin"
                 value={origin}
@@ -182,7 +246,7 @@ export function TripPostWizard() {
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="destination">Destination</Label>
+              <Label htmlFor="destination">Destination / मंज़िल</Label>
               <Input
                 id="destination"
                 value={destination}
@@ -191,7 +255,7 @@ export function TripPostWizard() {
             </div>
             <div className="space-y-2">
               <div className="flex flex-wrap items-end justify-between gap-2">
-                <Label className="block">Departure (India · IST)</Label>
+                <Label className="block">Departure (India · IST) / निकलने का समय</Label>
                 <Button
                   type="button"
                   variant="outline"
@@ -199,20 +263,63 @@ export function TripPostWizard() {
                   className="shrink-0"
                   onClick={snapToNextSlot}
                 >
-                  Next 15 min slot
+                  Next slot / अगला स्लॉट
                 </Button>
               </div>
               <p className="text-xs text-muted-foreground">
-                India (IST), 12-hour clock. Minutes: 00, 15, 30, or 45 only. Date
-                must be today or tomorrow — not later.
+                English: 12-hour clock, minutes only 00 / 15 / 30 / 45. Date = today or tomorrow.
+                <br />
+                हिंदी: 12 घंटे, मिनट सिर्फ 00, 15, 30, 45। तारीख आज या कल।
               </p>
+              {dep && minDate !== maxDate ? (
+                <div className="flex flex-wrap gap-2">
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant={dep.dateYmd === minDate ? "default" : "secondary"}
+                    className="rounded-full"
+                    onClick={() =>
+                      setDep((prev) =>
+                        prev
+                          ? clampBooking(floorNow(), {
+                              dateYmd: minDate,
+                              hour: prev.hour,
+                              minute: prev.minute,
+                            })
+                          : prev,
+                      )
+                    }
+                  >
+                    Today / आज
+                  </Button>
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant={dep.dateYmd === maxDate ? "default" : "secondary"}
+                    className="rounded-full"
+                    onClick={() =>
+                      setDep((prev) =>
+                        prev
+                          ? clampBooking(floorNow(), {
+                              dateYmd: maxDate,
+                              hour: prev.hour,
+                              minute: prev.minute,
+                            })
+                          : prev,
+                      )
+                    }
+                  >
+                    Tomorrow / कल
+                  </Button>
+                </div>
+              ) : null}
               {!dep ? (
-                <p className="text-sm text-muted-foreground">Loading calendar…</p>
+                <TimePickSkeleton />
               ) : (
                 <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
                   <div className="col-span-2 space-y-1.5 sm:col-span-1">
                     <Label htmlFor="dep-date" className="text-xs">
-                      Date
+                      Date / तारीख
                     </Label>
                     <Input
                       id="dep-date"
@@ -237,7 +344,7 @@ export function TripPostWizard() {
                   </div>
                   <div className="space-y-1.5">
                     <Label htmlFor="dep-hour12" className="text-xs">
-                      Hour
+                      Hour / घंटा
                     </Label>
                     <select
                       id="dep-hour12"
@@ -266,7 +373,7 @@ export function TripPostWizard() {
                   </div>
                   <div className="space-y-1.5">
                     <Label htmlFor="dep-min" className="text-xs">
-                      Minute
+                      Minute / मिनट
                     </Label>
                     <select
                       id="dep-min"
@@ -327,7 +434,21 @@ export function TripPostWizard() {
         {step === 1 ? (
           <div className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="seats">Available seats</Label>
+              <Label htmlFor="seats">Available seats / खाली सीटें</Label>
+              <div className="flex flex-wrap gap-2">
+                {([1, 2, 3, 4, 5, 6, 7] as const).map((n) => (
+                  <Button
+                    key={n}
+                    type="button"
+                    size="sm"
+                    variant={seats === String(n) ? "default" : "outline"}
+                    className="h-10 min-w-10 rounded-full px-3"
+                    onClick={() => setSeats(String(n))}
+                  >
+                    {n}
+                  </Button>
+                ))}
+              </div>
               <Input
                 id="seats"
                 inputMode="numeric"
@@ -335,10 +456,28 @@ export function TripPostWizard() {
                 min={0}
                 value={seats}
                 onChange={(e) => setSeats(e.target.value)}
+                className="max-w-[8rem]"
               />
+              <p className="text-xs text-muted-foreground">
+                Tap a number or type manually. / नंबर दबाएँ या लिखें।
+              </p>
             </div>
             <div className="space-y-2">
-              <Label htmlFor="price">Price per seat (₹)</Label>
+              <Label htmlFor="price">Price per seat (₹) / प्रति सीट किराया</Label>
+              <div className="flex flex-wrap gap-2">
+                {([150, 180, 200, 250, 300] as const).map((n) => (
+                  <Button
+                    key={n}
+                    type="button"
+                    size="sm"
+                    variant={price === String(n) ? "default" : "outline"}
+                    className="h-10 rounded-full px-3"
+                    onClick={() => setPrice(String(n))}
+                  >
+                    ₹{n}
+                  </Button>
+                ))}
+              </div>
               <Input
                 id="price"
                 inputMode="decimal"
@@ -347,13 +486,19 @@ export function TripPostWizard() {
                 step="1"
                 value={price}
                 onChange={(e) => setPrice(e.target.value)}
+                className="max-w-[8rem]"
               />
             </div>
           </div>
         ) : null}
 
         {step === 2 ? (
-          <div className="space-y-2 text-sm">
+          <div className="space-y-3 rounded-xl border border-dashed border-primary/30 bg-muted/30 p-3 text-sm">
+            <p className="text-xs text-muted-foreground">
+              English: check everything, then publish to the home feed.
+              <br />
+              हिंदी: सब ठीक हो तो पब्लिश करें — होम फीड पर चला जाएगा।
+            </p>
             <p>
               <span className="text-muted-foreground">Route:</span>{" "}
               {ROUTE_LABELS[routeDirection]}
@@ -376,9 +521,9 @@ export function TripPostWizard() {
           </div>
         ) : null}
 
-        {message ? (
+        {errorMessage ? (
           <p className="text-sm text-destructive" role="alert">
-            {message}
+            {errorMessage}
           </p>
         ) : null}
       </CardContent>
@@ -387,9 +532,12 @@ export function TripPostWizard() {
           <Button
             type="button"
             variant="outline"
-            onClick={() => setStep((s) => Math.max(0, s - 1))}
+            onClick={() => {
+              setErrorMessage(null);
+              setStep((s) => Math.max(0, s - 1));
+            }}
           >
-            Back
+            Back / पीछे
           </Button>
         ) : null}
         {step < 2 ? (
@@ -402,26 +550,26 @@ export function TripPostWizard() {
                 if (!dep) return;
                 const iso = istLocalDateTimeToIso(dep.dateYmd, dep.hour, dep.minute);
                 if (!isDepartureAllowedIso(iso)) {
-                  setMessage(
+                  setErrorMessage(
                     "Pick today or tomorrow (India time), at least 1 minute ahead, on :00, :15, :30, or :45.",
                   );
                   return;
                 }
-                setMessage(null);
+                setErrorMessage(null);
               }
               setStep((s) => Math.min(2, s + 1));
             }}
           >
-            Continue
+            Continue / आगे
           </Button>
         ) : (
           <Button
             type="button"
-            className="min-h-11 flex-1 bg-green-600 text-white hover:bg-green-700"
+            className="min-h-11 flex-1 bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-md hover:from-emerald-700 hover:to-teal-700"
             disabled={loading}
             onClick={onConfirm}
           >
-            {loading ? "Posting…" : "Confirm & publish"}
+            {loading ? "Publishing… / पब्लिश…" : "Publish to home feed / होम पर भेजें"}
           </Button>
         )}
       </CardFooter>
