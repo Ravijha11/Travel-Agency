@@ -45,6 +45,20 @@ function pickProfileDisplayName(meta, parsed) {
   return fromMessage || tg || "";
 }
 
+function sanitizeDisplayName(raw) {
+  const s = String(raw || "")
+    .replace(/\s+/g, " ")
+    .trim();
+  if (!s) return "";
+  if (s.length > 40) return "";
+  // If it contains too many digits, it's likely a message line, not a name.
+  const digits = (s.match(/\d/g) || []).length;
+  if (digits >= 4) return "";
+  // Filter obvious sentence-like route text.
+  if (/(लहार|ग्वालियर|to|से|जाना|संपर्क|contact|डेली|daily)/i.test(s)) return "";
+  return s;
+}
+
 function makeSupabase() {
   const url = process.env.SUPABASE_URL;
   const key =
@@ -139,7 +153,13 @@ function pickSeats(parsedSeats, directorySeats) {
 }
 
 function pickPrice(parsedPrice, directoryPrice) {
-  if (parsedPrice != null && !Number.isNaN(parsedPrice) && parsedPrice >= 0) {
+  // Treat missing/invalid/too-small values as "not mentioned".
+  // Prevent accidental 0 from being saved when price wasn't provided.
+  if (
+    parsedPrice != null &&
+    !Number.isNaN(parsedPrice) &&
+    parsedPrice >= 10
+  ) {
     return parsedPrice;
   }
   if (
@@ -200,7 +220,8 @@ async function saveParsedTrips(supabase, parsed, meta) {
     const displayName =
       (real?.full_name || "").trim() ||
       (directory?.display_name || "").trim() ||
-      pickProfileDisplayName(meta, parsed) ||
+      sanitizeDisplayName(meta?.telegramDisplayName) ||
+      sanitizeDisplayName(pickProfileDisplayName(meta, parsed)) ||
       "Lahar Connect Driver";
 
     const carModel =
