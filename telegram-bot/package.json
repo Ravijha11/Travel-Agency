@@ -1,0 +1,19 @@
+{
+  "name": "lahar-connect-telegram-bot",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Telegram bot for Lahar Connect driver trip ingestion",
+  "main": "bot.js",
+  "scripts": {
+    "start": "node bot.js",
+    "dev": "node bot.js"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.49.1",
+    "dotenv": "^16.4.7",
+    "telegraf": "^4.16.3"
+  }
+}
