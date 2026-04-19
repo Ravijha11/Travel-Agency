@@ -2,14 +2,17 @@ const path = require("path");
 const fs = require("fs");
 
 const envPath = path.join(__dirname, ".env");
-if (!fs.existsSync(envPath)) {
-  console.error(
-    `Missing .env file at:\n  ${envPath}\n` +
-      `Create it from .env.example. On Windows, ensure the name is ".env" (not ".env.txt").`,
-  );
-  process.exit(1);
+if (fs.existsSync(envPath)) {
+  require("dotenv").config({ path: envPath });
+} else {
+  // Railway, Render, Fly, etc. inject secrets as process.env — no file on disk.
+  require("dotenv").config();
+  if (!process.env.TELEGRAM_BOT_TOKEN) {
+    console.log(
+      "No telegram-bot/.env file; using environment variables only (typical for cloud hosting).",
+    );
+  }
 }
-require("dotenv").config({ path: envPath });
 
 const { Telegraf } = require("telegraf");
 const { parseTripMessage } = require("./parser");
@@ -32,9 +35,8 @@ const token = (process.env.TELEGRAM_BOT_TOKEN || "").trim();
 if (!token) {
   console.error(
     "TELEGRAM_BOT_TOKEN is empty or not set.\n" +
-      "Open telegram-bot/.env and add a line exactly:\n" +
-      "  TELEGRAM_BOT_TOKEN=paste_token_here\n" +
-      "(no quotes, no spaces around =). Then save and run npm start again.",
+      "Locally: create telegram-bot/.env (see .env.example).\n" +
+      "On Railway/Render: add TELEGRAM_BOT_TOKEN in the service Variables tab.",
   );
   process.exit(1);
 }
