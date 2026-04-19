@@ -13,13 +13,32 @@ const MAX_CAR_NUMBER = 40;
 export function normalizePhoneForStorage(raw: string): string {
   const t = raw.trim().replace(/\s/g, "");
   if (!t) return "";
-  if (t.startsWith("+")) return t;
+  if (t.startsWith("+")) {
+    const rest = t.slice(1).replace(/\D/g, "");
+    return rest ? `+${rest}` : "";
+  }
   const digits = t.replace(/\D/g, "");
   if (digits.length === 10) return `+91${digits}`;
-  if (digits.length >= 11 && digits.startsWith("91") && digits.length === 12) {
+  if (digits.length === 12 && digits.startsWith("91")) {
     return `+${digits}`;
   }
   return digits ? `+${digits}` : "";
+}
+
+/** 10-digit local part for default India (+91) entry UI; empty if not a clear India mobile. */
+export function tenDigitIndiaLocalPart(raw: string): string {
+  const n = normalizePhoneForStorage(raw);
+  if (/^\+91\d{10}$/.test(n)) return n.slice(3);
+  const digitsOnly = raw.replace(/\D/g, "");
+  if (digitsOnly.length === 10) return digitsOnly;
+  if (digitsOnly.length === 12 && digitsOnly.startsWith("91")) {
+    return digitsOnly.slice(2);
+  }
+  return "";
+}
+
+export function isIndia91TenDigitStored(raw: string): boolean {
+  return /^\+91\d{10}$/.test(normalizePhoneForStorage(raw));
 }
 
 function isValidPhone(s: string): boolean {
