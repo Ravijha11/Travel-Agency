@@ -2,6 +2,9 @@ import type { Metadata } from "next";
 
 export const metadata: Metadata = {
   title: "Privacy Policy",
+  description:
+    "Privacy policy for Lahar Connect. Learn what data we collect and how it is used for trip listings and coordination.",
+  alternates: { canonical: "/privacy" },
 };
 
 export default function PrivacyPage() {

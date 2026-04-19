@@ -2,6 +2,9 @@ import type { Metadata } from "next";
 
 export const metadata: Metadata = {
   title: "Driver Agreement",
+  description:
+    "Rules for drivers posting trips on Lahar Connect: accurate details, respectful behavior, and keeping listings updated.",
+  alternates: { canonical: "/driver-agreement" },
 };
 
 export default function DriverAgreementPage() {

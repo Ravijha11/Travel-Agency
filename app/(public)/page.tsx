@@ -15,6 +15,7 @@ import { jsonLdLocalBusiness, jsonLdWebsite } from "@/lib/seo";
 import { formatIst12hTodayTomorrow } from "@/lib/format-ist-time";
 import { IstLiveClock } from "@/components/ist-live-clock";
 import Image from "next/image";
+import type { Metadata } from "next";
 
 type Search = { [key: string]: string | string[] | undefined };
 
@@ -35,6 +36,13 @@ function formatPrice(amount: number) {
   }).format(amount);
 }
 
+export const metadata: Metadata = {
+  title: "Live rides (Lahar ↔ Gwalior)",
+  description:
+    "Live listings for shared cars between Lahar and Gwalior (Bhind, MP). Call drivers to book seats. Trips show for today and tomorrow only (India time).",
+  alternates: { canonical: "/" },
+};
+
 export default async function HomePage({
   searchParams,
 }: {
@@ -49,7 +57,8 @@ export default async function HomePage({
   const { data: trips, error } = await supabase
     .from("trips")
     .select(
-      "id, origin, destination, departure_time, available_seats, price_per_seat, driver_id, status",
+      `id, origin, destination, departure_time, available_seats, price_per_seat, driver_id, status,
+       driver:profiles!trips_driver_id_fkey(id, full_name, phone_number, car_model, car_number, is_verified, feed_priority)`,
     )
     .eq("route_direction", direction)
     .eq("status", "active")
@@ -57,37 +66,11 @@ export default async function HomePage({
     .lt("departure_time", feedUpper)
     .order("departure_time", { ascending: true });
 
-  const driverIds = Array.from(
-    new Set((trips ?? []).map((t) => t.driver_id)),
-  );
-  let profileById: Record<
-    string,
-    {
-      full_name: string;
-      phone_number: string;
-      car_model: string;
-      car_number: string;
-      is_verified: boolean;
-      feed_priority: number;
-    }
-  > = {};
-
-  if (driverIds.length) {
-    const { data: profiles } = await supabase
-      .from("profiles")
-      .select(
-        "id, full_name, phone_number, car_model, car_number, is_verified, feed_priority",
-      )
-      .in("id", driverIds);
-
-    profileById = Object.fromEntries(
-      (profiles ?? []).map((p) => [p.id, p] as const),
-    );
-  }
-
   const sortedTrips = [...(trips ?? [])].sort((a, b) => {
-    const pa = profileById[a.driver_id]?.feed_priority ?? DEFAULT_FEED_PRIORITY;
-    const pb = profileById[b.driver_id]?.feed_priority ?? DEFAULT_FEED_PRIORITY;
+    const da = Array.isArray(a.driver) ? a.driver[0] : a.driver;
+    const db = Array.isArray(b.driver) ? b.driver[0] : b.driver;
+    const pa = da?.feed_priority ?? DEFAULT_FEED_PRIORITY;
+    const pb = db?.feed_priority ?? DEFAULT_FEED_PRIORITY;
     if (pa !== pb) return pa - pb;
     return (
       new Date(a.departure_time).getTime() -
@@ -97,6 +80,9 @@ export default async function HomePage({
 
   return (
     <main className="mx-auto flex max-w-lg flex-col gap-4 px-4 pt-4">
+      <h1 className="sr-only">
+        Lahar to Gwalior shared car rides and taxi listings
+      </h1>
       <script
         type="application/ld+json"
         // JSON-LD for local search (Lahar/Bhind/MP + route intent keywords)
@@ -142,6 +128,20 @@ export default async function HomePage({
 
       <RouteToggle current={direction} />
 
+      <section className="rounded-2xl border bg-card/70 p-4 text-sm text-muted-foreground shadow-sm backdrop-blur supports-[backdrop-filter]:bg-card/60">
+        <p className="font-medium text-foreground">Quick search help</p>
+        <p className="mt-1">
+          Looking for: <span className="font-medium">Lahar to Gwalior car</span>,{" "}
+          <span className="font-medium">Gwalior to Lahar car</span>,{" "}
+          <span className="font-medium">Eeco</span>, <span className="font-medium">Swift Dzire</span>,{" "}
+          <span className="font-medium">Bolero</span>, or “Lahar Connect”.
+        </p>
+        <p className="mt-1">
+          हिंदी: लहार ↔ ग्वालियर साझा गाड़ी/टैक्सी लिस्टिंग। सीट बुक करने के लिए
+          ड्राइवर को कॉल करें।
+        </p>
+      </section>
+
       {error ? (
         <p className="text-sm text-destructive">
           Could not load trips. Check Supabase env and RLS.
@@ -156,7 +156,7 @@ export default async function HomePage({
           </p>
         ) : (
           sortedTrips.map((trip) => {
-            const profile = profileById[trip.driver_id];
+            const profile = Array.isArray(trip.driver) ? trip.driver[0] : trip.driver;
             const car = resolveCar(profile?.car_model ?? "");
             return (
               <TripCard

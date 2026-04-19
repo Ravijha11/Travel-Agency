@@ -1,7 +1,10 @@
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Safety",
+  title: "Safety tips for riders",
+  description:
+    "Safety guidance for booking shared rides on Lahar Connect. Confirm driver details, pickup point, and fare before travel.",
+  alternates: { canonical: "/safety" },
 };
 
 export default function SafetyPage() {

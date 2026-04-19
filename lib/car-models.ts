@@ -15,7 +15,7 @@ const normalize = (s: string) =>
 
 export const DEFAULT_CAR_PLACEHOLDER: CarModelInfo = {
   label: "Car",
-  imageSrc: "",
+  imageSrc: "/default car logo.png",
   aliases: [],
 };
 

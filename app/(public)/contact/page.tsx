@@ -2,7 +2,10 @@ import type { Metadata } from "next";
 import { SITE_URL } from "@/lib/branding";
 
 export const metadata: Metadata = {
-  title: "Contact",
+  title: "Contact Lahar Connect",
+  description:
+    "Contact Lahar Connect support for help with listings, drivers, or safety concerns.",
+  alternates: { canonical: "/contact" },
 };
 
 export default function ContactPage() {

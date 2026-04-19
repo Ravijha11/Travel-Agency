@@ -22,6 +22,12 @@ export default function AdminLayout({
           </div>
           <div className="flex items-center gap-2">
             <Link
+              href="/admin/driver-directory"
+              className={cn(buttonVariants({ variant: "outline", size: "sm" }))}
+            >
+              Driver directory
+            </Link>
+            <Link
               href="/admin/cars"
               className={cn(buttonVariants({ variant: "outline", size: "sm" }))}
             >

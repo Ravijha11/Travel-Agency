@@ -83,7 +83,7 @@ export function TripCard({
                 Sponsored
               </Badge>
             ) : null}
-            <p className="text-2xl font-semibold tabular-nums tracking-tight">
+            <p className="text-xl font-semibold tabular-nums tracking-tight sm:text-2xl">
               {departureLabel}
             </p>
             <DepartureCountdown
@@ -100,7 +100,7 @@ export function TripCard({
         </div>
       </CardHeader>
       <CardContent className="space-y-2 pb-3">
-        <div className="relative aspect-[4/3] w-full overflow-hidden rounded-lg border bg-muted/30">
+        <div className="relative aspect-[16/9] w-full overflow-hidden rounded-lg border bg-muted/30 sm:aspect-[4/3]">
           <CarCatalogImageCover
             src={car.imageSrc}
             alt={car.label}
@@ -132,7 +132,7 @@ export function TripCard({
           onClick={handleCall}
         >
           <Phone className="mr-2 size-5" aria-hidden />
-          {pending ? "Connecting…" : "Call now"}
+          {pending ? "Connecting…" : "Book seat (Call)"}
         </Button>
       </CardFooter>
     </Card>
