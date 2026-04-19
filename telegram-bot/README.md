@@ -51,7 +51,7 @@ npm install
 npm start
 ```
 
-Deploy the same `telegram-bot` folder on [Railway](https://railway.app) or [Render](https://render.com): set env vars, start command `node bot.js`, enable long polling (no webhook required for a simple VPS-style deploy).
+Deploy the same `telegram-bot` folder on [Railway](https://railway.app) or [Render](https://render.com): set **Variables** (same keys as `.env.example`) in the dashboard — **do not rely on a `.env` file** in the container; the bot reads `process.env` when no file is present. Start command `npm start`, long polling (no webhook required).
 
 ## Behaviour summary
 
